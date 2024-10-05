@@ -12,7 +12,12 @@ function getTimeString(time) {
     return `${day} day ${hour} hour ${minute} minute ${second} second ago`;
 }
 
-
+const removeActiveClass = () => {
+    const buttons = document.getElementsByClassName("category-btn");
+    for (const btn of buttons) {
+        btn.classList.remove("active");
+    }
+}
 // create loadCategories 
 const loadCategories = () => {
     fetch("https://openapi.programming-hero.com/api/phero-tube/categories")
@@ -33,7 +38,13 @@ const loadCategoryVideo = (id) => {
     // alert(id);
     fetch(`https://openapi.programming-hero.com/api/phero-tube/category/${id}`)
         .then((res) => res.json())
-        .then((data) => displayVideos(data.category))
+        .then((data) => {
+            removeActiveClass();
+            const activeBtn = document.getElementById(`btn-${id}`);
+            // console.log(id);
+            activeBtn.classList.add("active");
+            displayVideos(data.category)
+        })
         .catch((error) => console.log(error))
 }
 
@@ -48,7 +59,7 @@ const displayCategories = (categories) => {
         // button.innerText = item.category;
         const buttonContainer = document.createElement('div');
         buttonContainer.innerHTML = `
-        <button onclick="loadCategoryVideo(${item.category_id})" class="btn font-bold">${item.category}</button>
+        <button id="btn-${item.category_id}" onclick="loadCategoryVideo(${item.category_id})" class="btn font-bold category-btn">${item.category}</button>
         `;
         // add button 
         // categoriesContainer.appendChild(button);
@@ -59,6 +70,23 @@ const displayCategories = (categories) => {
 const displayVideos = (videos) => {
     const videoContainer = document.getElementById("videos");
     videoContainer.innerHTML = "";
+
+    if (videos.length == 0) {
+        videoContainer.classList.remove('grid');
+        videoContainer.innerHTML = `
+        <div class="min-h-[300px] flex flex-col gap-5 justify-center items-center">
+    <img src="/images/Icon.png" alt="">
+    <div>
+        <h3 class="font-bold text-center">Oops!! Sorry <br>There is no content here</h3>
+    </div>
+</div>
+        `;
+        return;
+    }
+    else {
+        videoContainer.classList.add('grid');
+    }
+
     videos.forEach(videos => {
         console.log(videos);
         const card = document.createElement('div');
